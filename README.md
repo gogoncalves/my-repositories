@@ -1,6 +1,12 @@
-# Getting Started with Create React App
+# My Repositories App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+My Repositories App is a project developed with React and JavaScript that allows you to save and organize your favorite GitHub repositories.
+
+## Features
+
+- Add Favorite Repositories: Search for and add GitHub repositories to your list of favorites.
+- View Repositories: See the list of repositories you have marked as favorites.
+- Remove Repositories: Remove repositories from your favorites list at any time.
 
 ## Available Scripts
 
