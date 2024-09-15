@@ -1,33 +1,45 @@
 import React, { useState, useCallback } from 'react';
-import { FaGithub, FaPlus } from 'react-icons/fa';
-import { Container, Form, SubmitButton } from './styles';
+import { FaGithub, FaPlus, FaSpinner, FaBars, FaTrash } from 'react-icons/fa';
+import { Container, Form, SubmitButton, List, DeleteButton } from './styles';
 import api from '../../services/api';
 
 export default function Main() {
     const [newRepo, setNewRepo] = useState('');
     const [repositorios, setRepositorios] = useState([]);
-    
+    const [loading, setLoading] = useState(false);
+
     function handleInputChange(e){
         setNewRepo(e.target.value);
     }
-
     
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback((e) => {
         e.preventDefault();
 
         async function submit(){
-            const response = await api.get(`repos/${newRepo}`);
+            setLoading(true);
+            try {
+                const response = await api.get(`repos/${newRepo}`);
 
-            const data = {
-                name: response.data.full_name,
+                const data = {
+                    name: response.data.full_name,
+                }
+        
+                setRepositorios([...repositorios, data]);
+                setNewRepo('');
+            } catch(error){
+                console.log(error);
+            } finally{
+                setLoading(false);
             }
-    
-            setRepositorios([...repositorios, data]);
-            setNewRepo('');
         }
 
         submit();
     }, [newRepo, repositorios]);
+
+    const handleDelete = useCallback((repo) => {
+        const find = repositorios.filter(r => r.name !== repo);
+        setRepositorios(find);
+    }, [repositorios]);
 
     return(
       <Container>
@@ -44,11 +56,30 @@ export default function Main() {
                 value={newRepo}
                 onChange={handleInputChange}    
             />
-            <SubmitButton>
-            <FaPlus color='#fff' size={14}/>
-
+            <SubmitButton Loading={loading ? 1 : 0}>
+                {loading ? (
+                    <FaSpinner color='#fff' size={14}/>
+                ) : (
+                    <FaPlus color='#fff' size={14}/>
+                )}
             </SubmitButton>
         </Form>
+
+        <List>
+            {repositorios.map(repo => (
+                <li key={repo.name}>
+                    <span>
+                        <DeleteButton onClick={() => handleDelete(repo.name)}>
+                            <FaTrash size={14} />
+                        </DeleteButton>
+                        {repo.name}    
+                    </span>
+                    <a href=''> 
+                        <FaBars size={20} />    
+                    </a>
+                </li>
+            ))}
+        </List>
 
       </Container>  
     );
