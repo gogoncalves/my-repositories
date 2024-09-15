@@ -1,12 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Container } from './styles';
+import api from '../../services/api';
 
 export default function Repository() {
-    const { repository } = useParams();
+    const { repo } = useParams();
+    const [repository, setRepository] = useState({});
+    const [issues, setIssues] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      async function load(){
+        const repoName = decodeURIComponent(repo);
+        
+        const [repositoryData, issuesData] = await Promise.all([
+          api.get(`/repos/${repoName}`),
+          api.get(`/repos/${repoName}/issues`, {
+            params:{
+              state: open,
+              per_page: 5
+            }
+          })
+        ]);
+
+        setRepository(repositoryData.data);
+        setIssues(issuesData.data);
+        setLoading(false);
+      }
+    }, [repo]);
 
     return (
-        <h1 style={{ color: '#FFF' }}>
-            {decodeURIComponent(repository)}
-        </h1>  
+        <Container>
+
+        </Container>  
     );
 }
