@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Owner, Loading, BackButton, IssuesList, PageActions } from './styles';
+import { Container, Owner, Loading, BackButton, IssuesList, PageActions, FilterList } from './styles';
 import { FaArrowLeft } from 'react-icons/fa';
 import api from '../../services/api';
 
@@ -11,6 +11,12 @@ export default function Repository() {
     const [issues, setIssues] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
+    const [filters, setFilters] = useState([
+      {state: 'all', label: 'All', active: true},
+      {state: 'open', label: 'Open', active: false},
+      {state: 'closed', label: 'Closed', active: false},
+    ]);
+    const [filterIndex, setFilterIndex] = useState(0);
 
     useEffect(() => {
         async function load() {
@@ -21,7 +27,7 @@ export default function Repository() {
                     api.get(`/repos/${repoName}`),
                     api.get(`/repos/${repoName}/issues`, {
                         params: {
-                            state: 'open',
+                            state: filters.find(f => f.active).state,
                             per_page: 5
                         }
                     })
@@ -45,7 +51,7 @@ export default function Repository() {
 
         const response = await api.get(`/repos/${repoName}/issues`, {
           params: {
-            state: 'open',
+            state: filters[filterIndex].state,
             page,
             per_page: 5,
           }
@@ -55,10 +61,14 @@ export default function Repository() {
       }
 
       loadIssue();
-    }, [page]);
+    }, [filterIndex, filters, page]);
 
     function handlePage(action){
       setPage(action === 'back' ? page - 1 : page + 1);
+    }
+
+    function handleFilter(index){
+      setFilterIndex(index);
     }
 
     if (loading) {
@@ -80,6 +90,18 @@ export default function Repository() {
                 <h1>{repo.name}</h1>
                 <p>{repo.description}</p>
             </Owner>
+
+            <FilterList active={filterIndex}>
+              {filters.map((filter, index) => (
+                <button 
+                type='button' 
+                key={filter.label} 
+                onClick={() => handleFilter(index)}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </FilterList>
 
             <IssuesList>
               {issues.map(issue => (
@@ -103,8 +125,13 @@ export default function Repository() {
               type='button' 
               onClick={() => handlePage('back')}
               disabled={page < 2}
-              >Back</button>
-              <button type='button' onClick={() => handlePage('next')}>Next</button>
+              >Back
+              </button>
+              <button 
+              type='button' 
+              onClick={() => handlePage('next')}
+              >Next
+              </button>
             </PageActions>
         </Container>
     );
