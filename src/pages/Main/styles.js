@@ -82,7 +82,6 @@ export const List = styled.ul`
         align-items: center;
         justify-content: space-between;
 
-        // ignora o primeiro e aplica a partir do segundo
         & + li{
             border-top: 1px solid #eee;
         }
